@@ -22,6 +22,7 @@ func Publish(routeKey, data string, exchanges ...string) (err error) {
 	}
 
 	config := getConfig()
+	// TODO amqp包暂未提供校验channel状态的方法
 	if publishClient == nil || publishClient.conn.IsClosed() {
 		publishClient, err = New(config)
 		if err != nil {
