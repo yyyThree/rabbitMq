@@ -2,7 +2,7 @@ package rabbitmq
 
 import (
 	"errors"
-	"github.com/yyyThree/rabbitMq/helper"
+	"github.com/yyyThree/rabbitmq/helper"
 )
 
 var config Config

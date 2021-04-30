@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/streadway/amqp"
-	rabbitmq "github.com/yyyThree/rabbitMq"
+	"github.com/yyyThree/rabbitmq"
 	"testing"
 )
 

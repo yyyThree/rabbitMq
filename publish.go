@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"errors"
 	"github.com/streadway/amqp"
-	"github.com/yyyThree/rabbitMq/helper"
+	"github.com/yyyThree/rabbitmq/helper"
 	"log"
 	"strconv"
 	"time"

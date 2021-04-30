@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/yyyThree/rabbitMq"
+	"github.com/yyyThree/rabbitmq"
 	"testing"
 )
 

@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	rabbitmq "github.com/yyyThree/rabbitMq"
+	"github.com/yyyThree/rabbitmq"
 )
 
 

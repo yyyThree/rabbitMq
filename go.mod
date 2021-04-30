@@ -1,4 +1,4 @@
-module github.com/yyyThree/rabbitMq
+module github.com/yyyThree/rabbitmq
 
 go 1.15
 
