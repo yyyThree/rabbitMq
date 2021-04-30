@@ -37,5 +37,10 @@ func TestPublishWithConfirm(t *testing.T)  {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// 发布至指定的交换机
+	err = rabbitmq.PublishWithConfirm("errorRouteKey2", "data6", "go.topic")
+	if err != nil {
+		t.Fatal(err)
+	}
 	time.Sleep(5 * 1e9)
 }
