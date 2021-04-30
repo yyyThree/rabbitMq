@@ -9,6 +9,7 @@
     - 支持队列持久化
 3. 消息发布
     - 支持普通消息发布（不保证100%发布成功）/带发布确认模式的消息发布（100%发布成功）
+    - 支持发布至指定交换机 
     - 支持消息发布失败记录/MQ服务器到达失败记录/MQ服务器入列失败记录
     - 支持消息持久化 
 4. 消息消费
@@ -40,8 +41,8 @@
             DeathLetter: "go.dl", // 死信交换机
         },
         Ttl: rabbitmq.Ttl {
-            QueueMsg: 86400 * 1e3, // 队列中消息有效期，毫秒
-            Msg: 86400 * 1e3, // 每条消息的有效期，毫秒
+            QueueMsg: 86400 * 1e3, // 队列中消息有效期，毫秒，默认为 86400 * 1e3
+            Msg: 86400 * 1e3, // 每条消息的有效期，毫秒，默认为 86400 * 1e3
         },
         // vhost对应的管理员账号，用于交换机、队列的声明
         Admin: rabbitmq.Admin {
@@ -99,11 +100,19 @@
 4. 消息发布
    1. 普通发布（不保证100%发布成功）
       ```go
+      // 默认发布至直连交换机
       rabbitmq.Publish("queueDirectKey1", "data1")
+      
+      // 指定交换机
+      rabbitmq.Publish("queueDirectKey1", "data1", exchangeName)
       ```   
    2. 带发布确认模式的发布
       ```go
+      // 默认发布至直连交换机
       rabbitmq.PublishWithConfirm("errorRouteKey", "data2")
+
+      // 指定交换机
+      rabbitmq.PublishWithConfirm("errorRouteKey", "data2", exchangeName)
       ```   
    3. 错误日志
       - `{Log.Dir}/publishFail/*/*.log`: 消息发布失败记录

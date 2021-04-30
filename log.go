@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-const defaultLogDir = "rabbitmqLog" // 默认文件存储文件夹地址
-
 var (
 	publishFailLogger *zap.Logger // 发布消息失败日志处理器
 	publishConfirmFailLogger *zap.Logger // 确认发布消息失败日志处理器

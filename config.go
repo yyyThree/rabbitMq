@@ -5,6 +5,8 @@ import (
 	"github.com/yyyThree/rabbitmq/helper"
 )
 
+const defaultLogDir = "rabbitmqLog" // 默认文件存储文件夹地址
+
 var config Config
 var adminConfig Config
 
@@ -34,8 +36,8 @@ type Exchange struct {
 
 // 有效期管理
 type Ttl struct {
-	QueueMsg int // 队列中消息有效期，毫秒
-	Msg      int // 每条消息的有效期，毫秒
+	QueueMsg int // 队列中消息有效期，毫秒，默认为 86400 * 1e3
+	Msg      int // 每条消息的有效期，毫秒，默认为 86400 * 1e3
 }
 
 // vhost对应的管理员账号，用于交换机、队列的声明
@@ -55,6 +57,9 @@ func InitConfig(c Config) error {
 		return errors.New("config error")
 	}
 
+	// 默认值处理
+	initDefault(&c)
+
 	config, adminConfig = c, c
 
 	// 设置管理员账号
@@ -65,6 +70,19 @@ func InitConfig(c Config) error {
 	initLog(c.Log.Dir)
 
 	return nil
+}
+
+// 默认值设置
+func initDefault(c *Config)  {
+	if c.Ttl.QueueMsg == 0 {
+		c.Ttl.QueueMsg = 86400 * 1e3
+	}
+	if c.Ttl.Msg == 0 {
+		c.Ttl.Msg = 86400 * 1e3
+	}
+	if c.Log.Dir == "" {
+		c.Log.Dir = defaultLogDir
+	}
 }
 
 // 获取普通业务系统的账号配置，用于正常的业务消息发布、订阅

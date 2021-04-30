@@ -14,7 +14,13 @@ var publishClient *rabbitmq
 // 发布消息
 // 不保证100%发布成功
 // 复用conn和channel
-func Publish(routeKey, data string) (err error) {
+// 默认发布至直连交换机
+func Publish(routeKey, data string, exchanges ...string) (err error) {
+	exchange := config.Exchange.Direct
+	if len(exchanges) > 0 {
+		exchange = exchanges[0]
+	}
+
 	config := getConfig()
 	if publishClient == nil || publishClient.conn.IsClosed() {
 		publishClient, err = New(config)
@@ -27,7 +33,6 @@ func Publish(routeKey, data string) (err error) {
 			return err
 		}
 	}
-	exchange := config.Exchange.Direct
 	err = publishClient.channel.Publish(exchange, routeKey, false, false, amqp.Publishing{
 		ContentType: "text/plain",
 		DeliveryMode: amqp.Persistent, // 持久化
@@ -50,7 +55,13 @@ func Publish(routeKey, data string) (err error) {
 // 发布消息
 // 开启发布确认模式
 // 使用独立的conn和channel
-func PublishWithConfirm(routeKey, data string) (err error) {
+// 默认发布至直连交换机
+func PublishWithConfirm(routeKey, data string, exchanges ...string) (err error) {
+	exchange := config.Exchange.Direct
+	if len(exchanges) > 0 {
+		exchange = exchanges[0]
+	}
+
 	config := getConfig()
 	// 创建MQ连接
 	client, err := New(config)
@@ -85,7 +96,6 @@ func PublishWithConfirm(routeKey, data string) (err error) {
 	// mandatory：是否对无法路由的消息进行返回处理
 	// 设置为true，用于监听入列失败回调
 	// false，无法入列时直接丢弃消息
-	exchange := config.Exchange.Direct
 	err = client.channel.Publish(exchange, routeKey, true, false, amqp.Publishing{
 		ContentType: "text/plain",
 		DeliveryMode: amqp.Persistent, // 持久化
