@@ -58,8 +58,10 @@
       ```go
       // 直连交换机
       rabbitmq.ExchangeDeclareDirect()
+      
       // 主题交换机
       rabbitmq.ExchangeDeclareTopic()
+      
       // 死信交换机
       rabbitmq.ExchangeDeclareDl()
       ```
@@ -72,10 +74,13 @@
       ```go
       // 直连交换机队列
       rabbitmq.QueueDeclareDirect("queueDirect", []string{"queueDirectKey1", "queueDirectKey2"})
+      
       // 主题交换机队列
       rabbitmq.QueueDeclareTopic("queueTopic", []string{"queueTopicKey1", "queueTopicKey2"})
+      
       // 带死信参数的直连交换机队列
       rabbitmq.QueueDeclareWithDl("queueWithDl", []string{"queueWithDlKey1", "queueWithDlKey2"}, "queueDlKey")
+      
       // 死信交换机队列
       rabbitmq.QueueDeclareDl("queueDl", []string{"queueDlKey"})
       ```
@@ -109,10 +114,13 @@
       ```go
       rabbitmq.Subscribe(QueueName, func(msg amqp.Delivery) {
         doSomething()
+        
         // 确认消费
         rabbitmq.Ack(msg)
+        
         // 否认消费，自动发布至对应的死信信息队列（如果存在）
         rabbitmq.Ack(msg)      
+        
         // 拒绝消费，自动发布至对应的死信信息队列（如果存在）
         rabbitmq.Reject(msg)         
       })      
