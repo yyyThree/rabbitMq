@@ -38,6 +38,7 @@ func Publish(routeKey, data string, exchanges ...string) (err error) {
 		ContentType: "text/plain",
 		DeliveryMode: amqp.Persistent, // 持久化
 		Expiration: strconv.Itoa(config.Ttl.Msg), // 每条消息的有效期
+		MessageId: helper.GenerateUuid(),
 		Body: []byte(data),
 	})
 	if err != nil {
@@ -101,6 +102,7 @@ func PublishWithConfirm(routeKey, data string, exchanges ...string) (err error) 
 		ContentType: "text/plain",
 		DeliveryMode: amqp.Persistent, // 持久化
 		Expiration: strconv.Itoa(config.Ttl.Msg), // 每条消息的有效期
+		MessageId: helper.GenerateUuid(),
 		Body: []byte(data),
 	})
 	if err != nil {

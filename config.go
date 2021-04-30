@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"errors"
 	"github.com/yyyThree/rabbitmq/helper"
+	"github.com/yyyThree/rabbitmq/library/redis"
 )
 
 const defaultLogDir = "rabbitmqLog" // 默认文件存储文件夹地址
@@ -16,6 +17,7 @@ type Config struct {
 	Ttl
 	Admin
 	Log
+	Redis
 }
 
 // 基础设置
@@ -51,6 +53,15 @@ type Log struct {
 	Dir string // 日志存储文件夹地址，默认为 rabbitmqLog
 }
 
+// redis配置，用于消息消费幂等性
+type Redis struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Db       int
+}
+
 // 初始化配置
 func InitConfig(c Config) error {
 	if helper.IsEmpty(c) {
@@ -69,11 +80,17 @@ func InitConfig(c Config) error {
 	// 初始化日志配置
 	initLog(c.Log.Dir)
 
+	// 初始化redis配置
+	err := initRedis(c.Redis)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // 默认值设置
-func initDefault(c *Config)  {
+func initDefault(c *Config) {
 	if c.Ttl.QueueMsg == 0 {
 		c.Ttl.QueueMsg = 86400 * 1e3
 	}
@@ -83,6 +100,23 @@ func initDefault(c *Config)  {
 	if c.Log.Dir == "" {
 		c.Log.Dir = defaultLogDir
 	}
+}
+
+func initRedis(r Redis) error {
+	if helper.IsEmpty(r) {
+		return nil
+	}
+	_, err := redis.GetConn(redis.Config{
+		Host:     r.Host,
+		Port:     r.Port,
+		User:     r.User,
+		Password: r.Password,
+		Db:       r.Db,
+	})
+	if err != nil {
+		return errors.New("Redis connect error: " + err.Error())
+	}
+	return nil
 }
 
 // 获取普通业务系统的账号配置，用于正常的业务消息发布、订阅

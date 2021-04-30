@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"encoding/json"
+	"github.com/satori/go.uuid"
 	"reflect"
 	"time"
 )
@@ -26,6 +28,37 @@ func IsEmpty(i interface{}) bool {
 	}
 
 	return reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()).Interface())
+}
+
+func GenerateUuid() string {
+	return uuid.NewV4().String()
+}
+
+func IsStruct(s interface{}) bool {
+	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	// uninitialized zero value of a struct
+	if v.Kind() == reflect.Invalid {
+		return false
+	}
+
+	return v.Kind() == reflect.Struct
+}
+
+// 结构体转JSON
+func StructToJson(s interface{}) []byte {
+	if !IsStruct(s) {
+		return nil
+	}
+
+	js, err := json.Marshal(s)
+	if err != nil {
+		return nil
+	}
+	return js
 }
 
 func FormatDateNow() string {

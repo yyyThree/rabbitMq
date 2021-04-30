@@ -5,7 +5,6 @@ import (
 	"github.com/yyyThree/rabbitmq"
 )
 
-
 const QueueNameDirect = "queueDirect"
 
 var QueueNameDirectKeys = []string{"queueDirectKey1", "queueDirectKey2"}
@@ -26,25 +25,29 @@ var QueueNameDlKey = "queueDlKey"
 func initConfig() {
 	fmt.Println("initConfig")
 	err := rabbitmq.InitConfig(rabbitmq.Config{
-		Base: rabbitmq.Base {
-			Host: "192.168.3.53",
-			Port: 5673,
-			User: "go",
+		Base: rabbitmq.Base{
+			Host:     "192.168.3.53",
+			Port:     5673,
+			User:     "go",
 			Password: "go",
-			Vhost: "go",
+			Vhost:    "go",
 		},
-		Exchange: rabbitmq.Exchange {
-			Direct: "go.direct",
-			Topic: "go.topic",
+		Exchange: rabbitmq.Exchange{
+			Direct:      "go.direct",
+			Topic:       "go.topic",
 			DeathLetter: "go.dl",
 		},
-		Ttl: rabbitmq.Ttl {
+		Ttl: rabbitmq.Ttl{
 			QueueMsg: 86400 * 1e3,
-			Msg: 86400 * 1e3,
+			Msg:      86400 * 1e3,
 		},
-		Admin: rabbitmq.Admin {
-			User: "goadmin",
+		Admin: rabbitmq.Admin{
+			User:     "goadmin",
 			Password: "goadmin",
+		},
+		Redis: rabbitmq.Redis{
+			Host: "192.168.3.53",
+			Port: 8003,
 		},
 	})
 	if err != nil {
