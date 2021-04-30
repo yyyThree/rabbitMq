@@ -106,7 +106,7 @@
       // 指定交换机
       rabbitmq.Publish("queueDirectKey1", "data1", exchangeName)
       ```   
-   2. 带发布确认模式的发布
+   2. 带发布确认模式的发布（100%发布成功）
       ```go
       // 默认发布至直连交换机
       rabbitmq.PublishWithConfirm("errorRouteKey", "data2")
@@ -136,3 +136,7 @@
       ```      
    2. 错误日志
       - `{Log.Dir}/subscribeFail/*/*.log`: 订阅队列失败记录
+
+## 三、下一步开发计划
+1. rabbitmq连接、channel异常的监听和后续处理
+2. 幂等性消费
