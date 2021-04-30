@@ -37,5 +37,5 @@ func TestPublishWithConfirm(t *testing.T)  {
 	if err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(10 * 1e9)
+	time.Sleep(5 * 1e9)
 }

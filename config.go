@@ -1,80 +1,78 @@
 package rabbitmq
 
-import ginConfig "gin/config"
+import (
+	"errors"
+	"github.com/yyyThree/rabbitMq/helper"
+)
+
+var config Config
+var adminConfig Config
 
 type Config struct {
-	base
-	exchange
-	ttl
-	admin
+	Base
+	Exchange
+	Ttl
+	Admin
+	Log
 }
 
-type base struct {
-	host     string
-	port     int
-	user     string
-	password string
-	vhost    string
+// 基础设置
+type Base struct {
+	Host     string
+	Port     int
+	User     string
+	Password string
+	Vhost    string
 }
 
-type exchange struct {
-	direct      string // 基础直连交换机，业务系统默认使用
-	topic       string // 主题交换机
-	deathLetter string // 死信交换机
+// 交换机类型
+type Exchange struct {
+	Direct      string // 基础直连交换机，业务系统默认使用
+	Topic       string // 主题交换机
+	DeathLetter string // 死信交换机
 }
 
-// 有效期
-type ttl struct {
-	queueMsg int // 队列中消息有效期，毫秒
-	msg      int // 每条消息的有效期，毫秒
+// 有效期管理
+type Ttl struct {
+	QueueMsg int // 队列中消息有效期，毫秒
+	Msg      int // 每条消息的有效期，毫秒
 }
 
 // vhost对应的管理员账号，用于交换机、队列的声明
-type admin struct {
-	user     string
-	password string
+type Admin struct {
+	User     string
+	Password string
+}
+
+// 日志配置
+type Log struct {
+	Dir string // 日志存储文件夹地址，默认为 rabbitmqLog
+}
+
+// 初始化配置
+func InitConfig(c Config) error {
+	if helper.IsEmpty(c) {
+		return errors.New("config error")
+	}
+
+	config, adminConfig = c, c
+
+	// 设置管理员账号
+	adminConfig.Base.User = adminConfig.Admin.User
+	adminConfig.Base.Password = adminConfig.Admin.Password
+
+	// 初始化日志配置
+	initLog(c.Log.Dir)
+
+	return nil
 }
 
 // 获取普通业务系统的账号配置，用于正常的业务消息发布、订阅
-func getConfig() *Config {
-	return &Config{
-		base: base{
-			host:     ginConfig.Config.Rabbitmq.Host,
-			port:     ginConfig.Config.Rabbitmq.Port,
-			user:     ginConfig.Config.Rabbitmq.User,
-			password: ginConfig.Config.Rabbitmq.Password,
-			vhost:    ginConfig.Config.Rabbitmq.Vhost,
-		},
-		exchange: exchange{
-			direct:      ginConfig.Config.Rabbitmq.ExDirect,
-			topic:       ginConfig.Config.Rabbitmq.ExTopic,
-			deathLetter: ginConfig.Config.Rabbitmq.ExDeathLetter,
-		},
-		ttl: ttl{
-			queueMsg: ginConfig.Config.Rabbitmq.TtlQueueMsg * 1e3,
-			msg:      ginConfig.Config.Rabbitmq.TtlMsg * 1e3,
-		},
-	}
+func getConfig() Config {
+	return config
 }
 
 // 获取管理员账号配置，用于交换机、队列的处理
-func getAdminConfig() *Config {
-	return &Config{
-		base: base{
-			host:     ginConfig.Config.Rabbitmq.Host,
-			port:     ginConfig.Config.Rabbitmq.Port,
-			user:     ginConfig.Config.Rabbitmq.AdminUser,
-			password: ginConfig.Config.Rabbitmq.AdminPassword,
-			vhost:    ginConfig.Config.Rabbitmq.Vhost,
-		},
-		exchange: exchange{
-			direct:      ginConfig.Config.Rabbitmq.ExDirect,
-			topic:       ginConfig.Config.Rabbitmq.ExTopic,
-			deathLetter: ginConfig.Config.Rabbitmq.ExDeathLetter,
-		},
-		ttl: ttl{
-			queueMsg: ginConfig.Config.Rabbitmq.TtlQueueMsg * 1e3,
-			msg:      ginConfig.Config.Rabbitmq.TtlMsg * 1e3,
-		},
-	}
+func getAdminConfig() Config {
+	return adminConfig
 }
