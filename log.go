@@ -50,3 +50,7 @@ func publishReturnFailLog(data map[string]interface{})  {
 func subscribeFailLog(data map[string]interface{})  {
 	subscribeFailLogger.Error("subscribeFail", data)
 }
+
+func subscribeIdpFailLog(data map[string]interface{})  {
+	subscribeFailLogger.Error("subscribeIdp", data)
+}

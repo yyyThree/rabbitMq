@@ -1,7 +1,6 @@
 package rabbitmq
 
 import (
-	"fmt"
 	"github.com/streadway/amqp"
 	"github.com/yyyThree/rabbitmq/helper"
 	"github.com/yyyThree/rabbitmq/library/redis"
@@ -23,7 +22,6 @@ func Subscribe(queueName string, callback Cb) (err error) {
 
 	go func() {
 		for msg := range msgList {
-			fmt.Println(111, msg.MessageId)
 			callback(msg)
 		}
 	}()
@@ -45,12 +43,19 @@ func SubscribeIdp(queueName string, callback Cb) (err error) {
 
 	go func() {
 		for msg := range msgList {
-			fmt.Println(222, msg.MessageId)
 			// 校验消息是否已被消费
 			if redis.Client != nil && msg.MessageId != "" {
 				key := redisPrefix + msg.MessageId
 				if redis.Client.Get(redis.GetCtx(), key).Val() != "" {
-					fmt.Println("已被消费", msg, msg.MessageId)
+					subscribeIdpFailLog(BaseMap{
+						"queueName": queueName,
+						"msg": BaseMap{
+							"MessageId": msg.MessageId,
+							"Exchange": msg.Exchange,
+							"RoutingKey": msg.RoutingKey,
+							"Body": string(msg.Body),
+						},
+					})
 					Reject(msg)
 					continue
 				}
@@ -97,13 +102,16 @@ func Ack(msg amqp.Delivery)  {
 // 幂等确认消费
 func AckIdp(msg amqp.Delivery)  {
 	_ = msg.Ack(false)
-	fmt.Println(22222, redis.Client)
 	if redis.Client != nil {
 		config = getConfig()
 		key := redisPrefix + msg.MessageId
-		data := helper.StructToJson(msg)
-		res := redis.Client.SetNX(redis.GetCtx(), key, data, time.Duration(config.Ttl.Msg)*time.Microsecond)
-		fmt.Println(333, key, res.Val(), res.Err(), string(data))
+		data := helper.MapToJson(BaseMap{
+			"MessageId": msg.MessageId,
+			"Exchange": msg.Exchange,
+			"RoutingKey": msg.RoutingKey,
+			"Body": string(msg.Body),
+		})
+		redis.Client.SetNX(redis.GetCtx(), key, data, time.Duration(config.Ttl.Msg)*time.Millisecond)
 	}
 }
 

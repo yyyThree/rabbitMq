@@ -61,6 +61,15 @@ func StructToJson(s interface{}) []byte {
 	return js
 }
 
+// map转JSON
+func MapToJson(m map[string]interface{}) []byte {
+	js, err := json.Marshal(m)
+	if err != nil {
+		return nil
+	}
+	return js
+}
+
 func FormatDateNow() string {
 	return time.Now().Format("2006-01-02")
 }

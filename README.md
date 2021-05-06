@@ -15,7 +15,8 @@
 4. 消息消费
     - 支持订阅队列，传入回调函数进行消费
     - 支持多种消息消费确认：ack/nack/reject
-    - 支持订阅队列失败记录
+    - 支持幂等性消费  
+    - 支持订阅队列失败记录/幂等消费失败记录
 
 ## 一、安装与引用
    
@@ -134,9 +135,17 @@
         rabbitmq.Reject(msg)         
       })      
       ```      
-   2. 错误日志
-      - `{Log.Dir}/subscribeFail/*/*.log`: 订阅队列失败记录
+   2. 幂等性消费
+      ```go
+      rabbitmq.SubscribeIdp(QueueName, func(msg amqp.Delivery) {
+        doSomething()
+
+        rabbitmq.Ack(msg)
+      })      
+      ```
+      自动校验消息幂等性，保证每条消息仅被消费一次。如果幂等校验不通过，消息将自动被`reject`并记录日志。         
+   3. 错误日志
+      - `{Log.Dir}/subscribeFail/*/*.log`: 订阅队列失败记录/幂等消费失败记录
 
 ## 三、下一步开发计划
 1. rabbitmq连接、channel异常的监听和后续处理
-2. 幂等性消费
