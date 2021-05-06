@@ -45,10 +45,10 @@ func initConfig() {
 			User:     "goadmin",
 			Password: "goadmin",
 		},
-		//Redis: rabbitmq.Redis{
-		//	Host: "192.168.3.53",
-		//	Port: 8003,
-		//},
+		Redis: rabbitmq.Redis{
+			Host: "192.168.3.53",
+			Port: 8003,
+		},
 	})
 	if err != nil {
 		fmt.Println(err)

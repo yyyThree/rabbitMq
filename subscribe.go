@@ -13,7 +13,7 @@ type Cb func(amqp.Delivery)
 
 // 订阅队列
 func Subscribe(queueName string, callback Cb) (err error) {
-	msgList, err := subscribe(queueName)
+	msgList, closeChan, err := subscribe(queueName)
 	if err != nil {
 		return
 	}
@@ -21,8 +21,22 @@ func Subscribe(queueName string, callback Cb) (err error) {
 	forever := make(chan bool)
 
 	go func() {
-		for msg := range msgList {
-			callback(msg)
+		for {
+			isClosed := false
+			select {
+			case msg := <-msgList:
+				callback(msg)
+			case e := <-closeChan:
+				subscribeConnErrorLog(BaseMap{
+					"queueName": queueName,
+					"err": e,
+				})
+				_ = Subscribe(queueName, callback)
+				isClosed = true
+			}
+			if isClosed {
+				break
+			}
 		}
 	}()
 
@@ -34,7 +48,7 @@ func Subscribe(queueName string, callback Cb) (err error) {
 // 订阅队列
 // 幂等性消费
 func SubscribeIdp(queueName string, callback Cb) (err error) {
-	msgList, err := subscribe(queueName)
+	msgList, closeChan, err := subscribe(queueName)
 	if err != nil {
 		return
 	}
@@ -42,11 +56,12 @@ func SubscribeIdp(queueName string, callback Cb) (err error) {
 	forever := make(chan bool)
 
 	go func() {
-		for msg := range msgList {
-			// 校验消息是否已被消费
-			if redis.Client != nil && msg.MessageId != "" {
-				key := redisPrefix + msg.MessageId
-				if redis.Client.Get(redis.GetCtx(), key).Val() != "" {
+		for {
+			isClosed := false
+			select {
+			case msg := <-msgList:
+				// 校验消息是否已被消费
+				if !checkMsgIdp(msg) {
 					subscribeIdpFailLog(BaseMap{
 						"queueName": queueName,
 						"msg": BaseMap{
@@ -59,9 +74,18 @@ func SubscribeIdp(queueName string, callback Cb) (err error) {
 					Reject(msg)
 					continue
 				}
+				callback(msg)
+			case e := <-closeChan:
+				subscribeConnErrorLog(BaseMap{
+					"queueName": queueName,
+					"err": e,
+				})
+				_ = SubscribeIdp(queueName, callback)
+				isClosed = true
 			}
-
-			callback(msg)
+			if isClosed {
+				break
+			}
 		}
 	}()
 
@@ -70,8 +94,21 @@ func SubscribeIdp(queueName string, callback Cb) (err error) {
 	return
 }
 
+// 校验消息幂等性
+func checkMsgIdp(msg amqp.Delivery) bool {
+	if redis.Client == nil || msg.MessageId == "" {
+		return true
+	}
+	key := redisPrefix + msg.MessageId
+	if redis.Client.Get(redis.GetCtx(), key).Val() == "" {
+		return true
+	}
+
+	return false
+}
+
 // 订阅队列
-func subscribe(queueName string) (msgList <-chan amqp.Delivery, err error) {
+func subscribe(queueName string) (msgList <-chan amqp.Delivery, notifyClose chan *amqp.Error, err error) {
 	client, err := New(config)
 	if err != nil {
 		subscribeFailLog(BaseMap{
@@ -80,6 +117,8 @@ func subscribe(queueName string) (msgList <-chan amqp.Delivery, err error) {
 		})
 		return
 	}
+	// 通道关闭通知
+	notifyClose = client.channel.NotifyClose(make(chan *amqp.Error))
 
 	msgList, err = client.channel.Consume(
 		queueName,
@@ -91,7 +130,7 @@ func subscribe(queueName string) (msgList <-chan amqp.Delivery, err error) {
 		nil,
 	)
 
-	return msgList, err
+	return msgList, notifyClose, err
 }
 
 // 确认消费

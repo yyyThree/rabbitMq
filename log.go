@@ -54,3 +54,7 @@ func subscribeFailLog(data map[string]interface{})  {
 func subscribeIdpFailLog(data map[string]interface{})  {
 	subscribeFailLogger.Error("subscribeIdp", data)
 }
+
+func subscribeConnErrorLog(data map[string]interface{})  {
+	subscribeFailLogger.Error("subscribeConnErrorLog", data)
+}
