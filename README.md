@@ -141,7 +141,7 @@
       rabbitmq.SubscribeIdp(QueueName, func(msg amqp.Delivery) {
         doSomething()
 
-        rabbitmq.Ack(msg)
+        rabbitmq.AckIdp(msg)
       })      
       ```
       自动校验消息幂等性，保证每条消息仅被消费一次。如果幂等校验不通过，消息将自动被`reject`并记录日志。         
