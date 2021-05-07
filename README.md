@@ -118,8 +118,8 @@
       ```   
    3. 错误日志
       - `{Log.Dir}/publishFail/*/*.log`: 消息发布失败记录
-      - `{Log.Dir}/publishConfirmFail/*`: MQ服务器到达失败记录
-      - `{Log.Dir}/publishReturnFail/*`: MQ服务器入列失败记录
+      - `{Log.Dir}/publishConfirmFail/*/*.log`: MQ服务器到达失败记录
+      - `{Log.Dir}/publishReturnFail/*/*.log`: MQ服务器入列失败记录
 5. 消息订阅
    1. 订阅队列
       ```go
